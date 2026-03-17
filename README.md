@@ -1,3 +1,3 @@
 # Moblin Stream Deck plugin
 
-Control Moblin with a Stream Deck.
+A [Stream Deck](https://www.elgato.com) plugin to control Moblin.
