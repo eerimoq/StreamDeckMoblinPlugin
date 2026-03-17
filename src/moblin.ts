@@ -1,12 +1,13 @@
 import streamDeck from "@elgato/streamdeck";
 import WebSocket from "ws";
 
-const MOBLIN_WS_URL = "ws://localhost:81";
+const DEFAULT_URL = "ws://localhost:81";
 const RECONNECT_INTERVAL_MS = 5000;
 
 let ws: WebSocket | null = null;
 let requestId = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let currentUrl: string = DEFAULT_URL;
 
 export type StateListener = (state: { 
 	recording?: boolean,
@@ -37,8 +38,8 @@ function connect(): void {
 	if (ws !== null) {
 		return;
 	}
-	streamDeck.logger.info(`Connecting to Moblin at ${MOBLIN_WS_URL}`);
-	const socket = new WebSocket(MOBLIN_WS_URL);
+	streamDeck.logger.info(`Connecting to Moblin at ${currentUrl}`);
+	const socket = new WebSocket(currentUrl);
 	socket.on("open", () => {
 		streamDeck.logger.info("Connected to Moblin");
 	});
@@ -81,8 +82,29 @@ function sendRequest(data: object): void {
 	ws.send(JSON.stringify(message));
 }
 
-export function connectToMoblin(): void {
+export function connectToMoblin(url?: string): void {
+	if (url !== undefined && url !== "") {
+		currentUrl = url;
+	}
 	connect();
+}
+
+export function setMoblinUrl(url: string): void {
+	const newUrl = url || DEFAULT_URL;
+	if (newUrl === currentUrl) {
+		return;
+	}
+	currentUrl = newUrl;
+	streamDeck.logger.info(`Moblin URL changed to ${currentUrl}`);
+	if (reconnectTimer !== null) {
+		clearTimeout(reconnectTimer);
+		reconnectTimer = null;
+	}
+	if (ws !== null) {
+		ws.close();
+	} else {
+		connect();
+	}
 }
 
 export function setRecord(on: boolean): void {

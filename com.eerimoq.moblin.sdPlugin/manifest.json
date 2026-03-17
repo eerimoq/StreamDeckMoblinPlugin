@@ -39,6 +39,7 @@
 	"CodePath": "bin/plugin.js",
 	"Description": "Moblin IRL Streaming",
 	"Icon": "imgs/plugin/marketplace",
+	"PropertyInspectorPath": "pi.html",
 	"SDKVersion": 3,
 	"Software": {
 		"MinimumVersion": "6.9"

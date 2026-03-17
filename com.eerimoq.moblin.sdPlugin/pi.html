@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Moblin</title>
+	<style>
+		body {
+			background-color: #2D2D2D;
+			color: #9B9B9B;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			font-size: 12px;
+			margin: 0;
+			padding: 0;
+		}
+		.sdpi-wrapper {
+			overflow-x: hidden;
+			padding: 0 16px;
+		}
+		.sdpi-item {
+			display: flex;
+			align-items: center;
+			margin: 12px 0;
+			min-height: 28px;
+		}
+		.sdpi-item-label {
+			flex: 30%;
+			text-align: right;
+			padding-right: 8px;
+			font-weight: 600;
+			white-space: nowrap;
+		}
+		.sdpi-item-value {
+			flex: 70%;
+		}
+		input[type="text"] {
+			width: 100%;
+			box-sizing: border-box;
+			padding: 4px 8px;
+			background: #3B3B3B;
+			border: 1px solid #4A4A4A;
+			border-radius: 3px;
+			color: #D8D8D8;
+			font-size: 12px;
+			height: 28px;
+		}
+		input[type="text"]:focus {
+			border-color: #007AFF;
+			outline: none;
+		}
+	</style>
+</head>
+<body>
+	<div class="sdpi-wrapper">
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">URL</div>
+			<div class="sdpi-item-value">
+				<input type="text" id="url" placeholder="ws://localhost:81" />
+			</div>
+		</div>
+	</div>
+	<script>
+		var websocket = null;
+		var uuid = null;
+
+		function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+			uuid = inPropertyInspectorUUID;
+			websocket = new WebSocket("ws://127.0.0.1:" + inPort);
+
+			websocket.onopen = function () {
+				websocket.send(JSON.stringify({
+					event: inRegisterEvent,
+					uuid: uuid
+				}));
+				websocket.send(JSON.stringify({
+					event: "getGlobalSettings",
+					context: uuid
+				}));
+			};
+
+			websocket.onmessage = function (evt) {
+				var data = JSON.parse(evt.data);
+				if (data.event === "didReceiveGlobalSettings") {
+					var settings = data.payload.settings;
+					document.getElementById("url").value = settings.url || "";
+				}
+			};
+		}
+
+		document.getElementById("url").addEventListener("change", function () {
+			if (websocket && websocket.readyState === WebSocket.OPEN) {
+				websocket.send(JSON.stringify({
+					event: "setGlobalSettings",
+					context: uuid,
+					payload: {
+						url: this.value
+					}
+				}));
+			}
+		});
+	</script>
+</body>
+</html>
