@@ -1,2 +1,3 @@
-# StreamDeckMoblinPlugin
-Stream Deck Moblin plugin.
+# Moblin Stream Deck plugin
+
+Control Moblin with a Stream Deck.

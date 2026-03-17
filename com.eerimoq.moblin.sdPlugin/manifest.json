@@ -1,0 +1,47 @@
+{
+	"Name": "Moblin",
+	"Version": "0.1.0.0",
+	"Author": "Erik Moqvist",
+	"Actions": [
+		{
+			"Name": "Record",
+			"UUID": "com.eerimoq.moblin.record",
+			"Icon": "imgs/actions/record/icon",
+			"Tooltip": "Start and stop recording.",
+			"PropertyInspectorPath": "ui/record.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/record/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		}
+	],
+	"Category": "Moblin",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Description": "Moblin IRL Streaming",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 3,
+	"Software": {
+		"MinimumVersion": "6.9"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"UUID": "com.eerimoq.moblin"
+}
