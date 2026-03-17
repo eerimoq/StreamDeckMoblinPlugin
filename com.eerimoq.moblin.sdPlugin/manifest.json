@@ -8,13 +8,27 @@
 			"UUID": "com.eerimoq.moblin.record",
 			"Icon": "imgs/actions/record/icon",
 			"Tooltip": "Start and stop recording.",
-			"PropertyInspectorPath": "ui/record.html",
 			"Controllers": [
 				"Keypad"
 			],
 			"States": [
 				{
 					"Image": "imgs/actions/record/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Stream",
+			"UUID": "com.eerimoq.moblin.stream",
+			"Icon": "imgs/actions/stream/icon",
+			"Tooltip": "Start and stop streaming.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/stream/key",
 					"TitleAlignment": "middle"
 				}
 			]

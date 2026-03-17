@@ -8,7 +8,10 @@ let ws: WebSocket | null = null;
 let requestId = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-export type StateListener = (state: { recording?: boolean }) => void;
+export type StateListener = (state: { 
+	recording?: boolean,
+	streaming?: boolean
+}) => void;
 const stateListeners: StateListener[] = [];
 
 export function onStateChange(listener: StateListener): void {
@@ -84,4 +87,8 @@ export function connectToMoblin(): void {
 
 export function setRecord(on: boolean): void {
 	sendRequest({ setRecord: { on } });
+}
+
+export function setStream(on: boolean): void {
+	sendRequest({ setStream: { on } });
 }
