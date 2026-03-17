@@ -8,6 +8,28 @@ let ws: WebSocket | null = null;
 let requestId = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
+export type StateListener = (state: { recording?: boolean }) => void;
+const stateListeners: StateListener[] = [];
+
+export function onStateChange(listener: StateListener): void {
+	stateListeners.push(listener);
+}
+
+function handleMessage(data: WebSocket.Data): void {
+	try {
+		const message = JSON.parse(data.toString());
+		const event = message?.event?.data;
+		if (event?.state?.data) {
+			const state = event.state.data;
+			for (const listener of stateListeners) {
+				listener(state);
+			}
+		}
+	} catch (error) {
+		streamDeck.logger.error(`Failed to parse Moblin message: ${error}`);
+	}
+}
+
 function connect(): void {
 	if (ws !== null) {
 		return;
@@ -16,6 +38,9 @@ function connect(): void {
 	const socket = new WebSocket(MOBLIN_WS_URL);
 	socket.on("open", () => {
 		streamDeck.logger.info("Connected to Moblin");
+	});
+	socket.on("message", (data) => {
+		handleMessage(data);
 	});
 	socket.on("close", () => {
 		streamDeck.logger.info("Disconnected from Moblin");
