@@ -1,0 +1,3 @@
+{
+  "ignorePatterns": ["package-lock.json", "com.eerimoq.moblin.sdPlugin/manifest.json"]
+}

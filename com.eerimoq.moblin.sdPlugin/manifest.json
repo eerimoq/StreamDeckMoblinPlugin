@@ -8,7 +8,9 @@
       "UUID": "com.eerimoq.moblin.record",
       "Icon": "imgs/actions/record/icon",
       "Tooltip": "Start and stop recording.",
-      "Controllers": ["Keypad"],
+      "Controllers": [
+        "Keypad"
+      ],
       "States": [
         {
           "Image": "imgs/actions/record/key",
@@ -21,7 +23,9 @@
       "UUID": "com.eerimoq.moblin.stream",
       "Icon": "imgs/actions/stream/icon",
       "Tooltip": "Start and stop streaming.",
-      "Controllers": ["Keypad"],
+      "Controllers": [
+        "Keypad"
+      ],
       "States": [
         {
           "Image": "imgs/actions/stream/key",
@@ -35,7 +39,9 @@
       "Icon": "imgs/actions/filter/icon",
       "Tooltip": "Toggle a filter on and off.",
       "PropertyInspectorPath": "ui/filter.html",
-      "Controllers": ["Keypad"],
+      "Controllers": [
+        "Keypad"
+      ],
       "States": [
         {
           "Image": "imgs/actions/filter/key",
