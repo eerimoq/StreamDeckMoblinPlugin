@@ -1,62 +1,72 @@
 {
-	"Name": "Moblin",
-	"Version": "0.1.0.0",
-	"Author": "Erik Moqvist",
-	"Actions": [
-		{
-			"Name": "Record",
-			"UUID": "com.eerimoq.moblin.record",
-			"Icon": "imgs/actions/record/icon",
-			"Tooltip": "Start and stop recording.",
-			"Controllers": [
-				"Keypad"
-			],
-			"States": [
-				{
-					"Image": "imgs/actions/record/key",
-					"TitleAlignment": "middle"
-				}
-			]
-		},
-		{
-			"Name": "Stream",
-			"UUID": "com.eerimoq.moblin.stream",
-			"Icon": "imgs/actions/stream/icon",
-			"Tooltip": "Start and stop streaming.",
-			"Controllers": [
-				"Keypad"
-			],
-			"States": [
-				{
-					"Image": "imgs/actions/stream/key",
-					"TitleAlignment": "middle"
-				}
-			]
-		}
-	],
-	"Category": "Moblin",
-	"CategoryIcon": "imgs/plugin/category-icon",
-	"CodePath": "bin/plugin.js",
-	"Description": "Moblin IRL Streaming",
-	"Icon": "imgs/plugin/marketplace",
-	"PropertyInspectorPath": "global-settings.html",
-	"SDKVersion": 3,
-	"Software": {
-		"MinimumVersion": "6.9"
-	},
-	"OS": [
-		{
-			"Platform": "mac",
-			"MinimumVersion": "12"
-		},
-		{
-			"Platform": "windows",
-			"MinimumVersion": "10"
-		}
-	],
-	"Nodejs": {
-		"Version": "20",
-		"Debug": "enabled"
-	},
-	"UUID": "com.eerimoq.moblin"
+  "Name": "Moblin",
+  "Version": "0.1.0.0",
+  "Author": "Erik Moqvist",
+  "Actions": [
+    {
+      "Name": "Record",
+      "UUID": "com.eerimoq.moblin.record",
+      "Icon": "imgs/actions/record/icon",
+      "Tooltip": "Start and stop recording.",
+      "Controllers": ["Keypad"],
+      "States": [
+        {
+          "Image": "imgs/actions/record/key",
+          "TitleAlignment": "middle"
+        }
+      ]
+    },
+    {
+      "Name": "Stream",
+      "UUID": "com.eerimoq.moblin.stream",
+      "Icon": "imgs/actions/stream/icon",
+      "Tooltip": "Start and stop streaming.",
+      "Controllers": ["Keypad"],
+      "States": [
+        {
+          "Image": "imgs/actions/stream/key",
+          "TitleAlignment": "middle"
+        }
+      ]
+    },
+    {
+      "Name": "Filter",
+      "UUID": "com.eerimoq.moblin.filter",
+      "Icon": "imgs/actions/filter/icon",
+      "Tooltip": "Toggle a filter on and off.",
+      "PropertyInspectorPath": "ui/filter.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        {
+          "Image": "imgs/actions/filter/key",
+          "TitleAlignment": "middle"
+        }
+      ]
+    }
+  ],
+  "Category": "Moblin",
+  "CategoryIcon": "imgs/plugin/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Description": "Moblin IRL Streaming",
+  "Icon": "imgs/plugin/marketplace",
+  "PropertyInspectorPath": "ui/settings.html",
+  "SDKVersion": 3,
+  "Software": {
+    "MinimumVersion": "6.9"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "UUID": "com.eerimoq.moblin"
 }
