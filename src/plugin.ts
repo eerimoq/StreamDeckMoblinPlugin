@@ -3,6 +3,7 @@ import streamDeck from "@elgato/streamdeck";
 import { Stream } from "./actions/stream";
 import { Record } from "./actions/record";
 import { Filter } from "./actions/filter";
+import { Reaction } from "./actions/reaction";
 import { connectToMoblin } from "./moblin";
 
 type GlobalSettings = {
@@ -13,6 +14,7 @@ streamDeck.logger.setLevel("info");
 streamDeck.actions.registerAction(new Stream());
 streamDeck.actions.registerAction(new Record());
 streamDeck.actions.registerAction(new Filter());
+streamDeck.actions.registerAction(new Reaction());
 
 streamDeck.settings.onDidReceiveGlobalSettings<GlobalSettings>((ev) => {
   connectToMoblin(ev.settings.url);

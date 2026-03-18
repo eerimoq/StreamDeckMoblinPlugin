@@ -48,6 +48,22 @@
           "TitleAlignment": "middle"
         }
       ]
+    },
+    {
+      "Name": "Reaction",
+      "UUID": "com.eerimoq.moblin.reaction",
+      "Icon": "imgs/actions/reaction/icon",
+      "Tooltip": "Trigger a reaction.",
+      "PropertyInspectorPath": "ui/reaction.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/reaction/key",
+          "TitleAlignment": "middle"
+        }
+      ]
     }
   ],
   "Category": "Moblin",

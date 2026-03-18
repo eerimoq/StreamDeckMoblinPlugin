@@ -138,3 +138,7 @@ export function setStream(on: boolean): void {
 export function setFilter(filter: string, on: boolean): void {
   sendRequest({ setFilter: { filter: { [filter]: {} }, on } });
 }
+
+export function triggerReaction(reaction: string): void {
+  sendRequest({ triggerReaction: { reaction: { [reaction]: {} } } });
+}
