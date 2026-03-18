@@ -13,7 +13,9 @@ export class Filter extends SingletonAction<FilterSettings> {
 		super();
 		onStateChange((state) => {
 			if (state.filters !== undefined) {
-				this.filters = state.filters;
+				for (const [name, on] of Object.entries(state.filters)) {
+					this.filters[name] = on;
+				}
 			}
 		});
 	}
