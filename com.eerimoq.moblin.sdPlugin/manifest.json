@@ -32,6 +32,22 @@
 					"TitleAlignment": "middle"
 				}
 			]
+		},
+		{
+			"Name": "Filter",
+			"UUID": "com.eerimoq.moblin.filter",
+			"Icon": "imgs/actions/filter/icon",
+			"Tooltip": "Toggle a filter on and off.",
+			"PropertyInspectorPath": "filter-pi.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/filter/key",
+					"TitleAlignment": "middle"
+				}
+			]
 		}
 	],
 	"Category": "Moblin",

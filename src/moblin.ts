@@ -11,7 +11,8 @@ let currentWsUrl: string = DEFAULT_WS_URL;
 
 export type StateListener = (state: { 
 	recording?: boolean,
-	streaming?: boolean
+	streaming?: boolean,
+	filters?: Record<string, boolean>
 }) => void;
 const stateListeners: StateListener[] = [];
 
@@ -113,4 +114,8 @@ export function setRecord(on: boolean): void {
 
 export function setStream(on: boolean): void {
 	sendRequest({ setStream: { on } });
+}
+
+export function setFilter(filter: string, on: boolean): void {
+	sendRequest({ setFilter: { filter, on } });
 }
