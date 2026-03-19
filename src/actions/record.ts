@@ -1,8 +1,8 @@
-import { action, KeyDownEvent, SingletonAction } from "@elgato/streamdeck";
-import { onStateChange, setRecord } from "../moblin";
+import { action, KeyDownEvent } from "@elgato/streamdeck";
+import { onStateChange, setRecord, MoblinAction } from "../moblin";
 
 @action({ UUID: "com.eerimoq.moblin.record" })
-export class Record extends SingletonAction {
+export class Record extends MoblinAction {
   private recording = false;
 
   constructor() {
@@ -14,7 +14,7 @@ export class Record extends SingletonAction {
     });
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+  override async onMoblinKeyDown(ev: KeyDownEvent): Promise<void> {
     this.recording = !this.recording;
     setRecord(this.recording);
   }

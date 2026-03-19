@@ -1,12 +1,12 @@
-import { action, KeyDownEvent, SingletonAction } from "@elgato/streamdeck";
-import { onStateChange, setFilter } from "../moblin";
+import { action, KeyDownEvent } from "@elgato/streamdeck";
+import { onStateChange, setFilter, MoblinAction } from "../moblin";
 
 type FilterSettings = {
   filterName?: string;
 };
 
 @action({ UUID: "com.eerimoq.moblin.filter" })
-export class Filter extends SingletonAction<FilterSettings> {
+export class Filter extends MoblinAction<FilterSettings> {
   private filters: Record<string, boolean> = {};
 
   constructor() {
@@ -22,7 +22,7 @@ export class Filter extends SingletonAction<FilterSettings> {
     });
   }
 
-  override async onKeyDown(ev: KeyDownEvent<FilterSettings>): Promise<void> {
+  override async onMoblinKeyDown(ev: KeyDownEvent<FilterSettings>): Promise<void> {
     const filterName = ev.payload.settings.filterName;
     if (!filterName) {
       return;

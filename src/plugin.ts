@@ -6,8 +6,9 @@ import { Filter } from "./actions/filter";
 import { Reaction } from "./actions/reaction";
 import { connectToMoblin } from "./moblin";
 
-type GlobalSettings = {
+export type GlobalSettings = {
   url?: string;
+  connectionStatus?: string;
 };
 
 streamDeck.logger.setLevel("info");

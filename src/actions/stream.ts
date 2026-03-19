@@ -1,8 +1,8 @@
-import { action, KeyDownEvent, SingletonAction } from "@elgato/streamdeck";
-import { onStateChange, setStream } from "../moblin";
+import { action, KeyDownEvent } from "@elgato/streamdeck";
+import { onStateChange, setStream, MoblinAction } from "../moblin";
 
 @action({ UUID: "com.eerimoq.moblin.stream" })
-export class Stream extends SingletonAction {
+export class Stream extends MoblinAction {
   private streaming = false;
 
   constructor() {
@@ -14,7 +14,7 @@ export class Stream extends SingletonAction {
     });
   }
 
-  override async onKeyDown(ev: KeyDownEvent): Promise<void> {
+  override async onMoblinKeyDown(ev: KeyDownEvent): Promise<void> {
     this.streaming = !this.streaming;
     setStream(this.streaming);
   }
