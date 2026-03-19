@@ -6,10 +6,21 @@ import { JsonObject } from "@elgato/utils";
 const DEFAULT_HTTP_URL = "http://localhost";
 const RECONNECT_INTERVAL_MS = 5000;
 
+class Mutex {
+  private mutex = Promise.resolve();
+
+  lock(): Promise<() => void> {
+    return new Promise((resolve) => {
+      this.mutex = this.mutex.then(() => new Promise(resolve));
+    });
+  }
+}
+
+const settingsMutex = new Mutex();
 let ws: WebSocket | null = null;
 let requestId = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-let currentWsUrl: string | null = toWebSocketUrl(DEFAULT_HTTP_URL);
+let currentWsUrl: string | null = null;
 
 function toWebSocketUrl(url?: string): string | null {
   let httpUrl = url?.trim();
@@ -52,11 +63,27 @@ export type StateListener = (state: {
 }) => void;
 const stateListeners: StateListener[] = [];
 
+function toDataSourceItems(scenes: Array<any>): any[] {
+  const items: any[] = [
+    {
+      label: "Select a scene...",
+      value: "",
+    },
+  ];
+  for (const scene of scenes) {
+    items.push({
+      label: scene.name,
+      value: scene.id,
+    });
+  }
+  return items;
+}
+
 export function onStateChange(listener: StateListener): void {
   stateListeners.push(listener);
 }
 
-function handleMessage(data: WebSocket.Data): void {
+async function handleMessage(data: WebSocket.Data): Promise<void> {
   try {
     const message = JSON.parse(data.toString());
     const event = message?.event?.data;
@@ -66,47 +93,59 @@ function handleMessage(data: WebSocket.Data): void {
         listener(state);
       }
     }
+    const response = message?.response?.data;
+    if (response?.getSettings?.data?.scenes) {
+      await streamDeck.ui.sendToPropertyInspector({
+        event: "scenes",
+        items: toDataSourceItems(response.getSettings.data.scenes),
+      });
+    }
   } catch (error) {
     streamDeck.logger.error(`Failed to parse Moblin message: ${error}`);
   }
 }
 
-function connect(): void {
-  if (ws !== null || currentWsUrl === null) {
+async function connect(): Promise<void> {
+  if (ws !== null || !currentWsUrl) {
     return;
   }
   streamDeck.logger.info(`Connecting to Moblin at ${currentWsUrl}`);
-  updateConnected();
+  await updateConnected();
   const socket = new WebSocket(currentWsUrl);
-  socket.on("open", () => {
+  socket.on("open", async () => {
     streamDeck.logger.info("Connected to Moblin");
-    updateConnected();
+    getSettings();
+    await updateConnected();
   });
-  socket.on("message", (data) => {
-    handleMessage(data);
+  socket.on("message", async (data) => {
+    await handleMessage(data);
   });
-  socket.on("close", () => {
+  socket.on("close", async () => {
     streamDeck.logger.info("Disconnected from Moblin");
-    updateConnected();
     ws = null;
+    await updateConnected();
     scheduleReconnect();
   });
   socket.on("error", (error) => {
     streamDeck.logger.error(`Moblin WebSocket error: ${error.message}`);
-    updateConnected();
     socket.close();
   });
   ws = socket;
 }
 
 async function updateConnected() {
-  const settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
-  if (ws?.readyState == WebSocket.OPEN) {
-    settings.connectionStatus = "Connected to Moblin";
-  } else {
-    settings.connectionStatus = "Connecting to Moblin...";
+  const unlock = await settingsMutex.lock();
+  try {
+    const settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
+    if (ws?.readyState == WebSocket.OPEN) {
+      settings.connectionStatus = "Connected to Moblin";
+    } else {
+      settings.connectionStatus = "Connecting to Moblin...";
+    }
+    await streamDeck.settings.setGlobalSettings(settings);
+  } finally {
+    unlock();
   }
-  await streamDeck.settings.setGlobalSettings(settings);
 }
 
 function scheduleReconnect(): void {
@@ -130,6 +169,7 @@ function sendRequest(data: object): void {
       data: data,
     },
   };
+  streamDeck.logger.info(`Sending request ${JSON.stringify(message)}`);
   ws.send(JSON.stringify(message));
 }
 
@@ -138,7 +178,7 @@ function isConnected(): boolean {
 }
 
 export function connectToMoblin(url?: string): void {
-  const newWsUrl = toWebSocketUrl(url);
+  let newWsUrl = toWebSocketUrl(url);
   if (newWsUrl === currentWsUrl) {
     return;
   }
@@ -164,6 +204,14 @@ export function setFilter(filter: string, on: boolean): void {
 
 export function triggerReaction(reaction: string): void {
   sendRequest({ triggerReaction: { reaction: { [reaction]: {} } } });
+}
+
+export function getSettings(): void {
+  sendRequest({ getSettings: {} });
+}
+
+export function setScene(id: string): void {
+  sendRequest({ setScene: { id } });
 }
 
 export abstract class MoblinAction<T extends JsonObject = JsonObject> extends SingletonAction<T> {

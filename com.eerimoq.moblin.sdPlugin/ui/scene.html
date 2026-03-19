@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head lang="en">
+    <meta charset="utf-8" />
+    <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  </head>
+  <body>
+    <sdpi-item label="Scene">
+      <sdpi-select setting="sceneId" datasource="scenes" loading="Fetching scenes..." hot-reload>
+      </sdpi-select>
+    </sdpi-item>
+    <sdpi-item label="Remote control Web URL">
+      <sdpi-textfield setting="url" placeholder="http://localhost" global></sdpi-textfield>
+    </sdpi-item>
+    <sdpi-item label="Status">
+      <sdpi-textfield setting="connectionStatus" placeholder="" global></sdpi-textfield>
+    </sdpi-item>
+  </body>
+</html>

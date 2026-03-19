@@ -4,6 +4,7 @@ import { Stream } from "./actions/stream";
 import { Record } from "./actions/record";
 import { Filter } from "./actions/filter";
 import { Reaction } from "./actions/reaction";
+import { Scene } from "./actions/scene";
 import { connectToMoblin } from "./moblin";
 
 export type GlobalSettings = {
@@ -14,6 +15,7 @@ export type GlobalSettings = {
 streamDeck.logger.setLevel("info");
 streamDeck.actions.registerAction(new Stream());
 streamDeck.actions.registerAction(new Record());
+streamDeck.actions.registerAction(new Scene());
 streamDeck.actions.registerAction(new Filter());
 streamDeck.actions.registerAction(new Reaction());
 

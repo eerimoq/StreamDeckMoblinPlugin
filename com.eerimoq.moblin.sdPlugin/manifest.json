@@ -1,6 +1,6 @@
 {
   "Name": "Moblin",
-  "Version": "0.2.0.0",
+  "Version": "0.3.0.0",
   "Author": "Erik Moqvist",
   "Actions": [
     {
@@ -29,6 +29,22 @@
       "States": [
         {
           "Image": "imgs/actions/stream/key",
+          "TitleAlignment": "middle"
+        }
+      ]
+    },
+    {
+      "Name": "Scene",
+      "UUID": "com.eerimoq.moblin.scene",
+      "Icon": "imgs/actions/scene/icon",
+      "Tooltip": "Switch to a scene.",
+      "PropertyInspectorPath": "ui/scene.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/scene/key",
           "TitleAlignment": "middle"
         }
       ]
