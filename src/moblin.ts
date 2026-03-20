@@ -134,14 +134,20 @@ async function connect(): Promise<void> {
 }
 
 async function updateConnected() {
-  const unlock = await settingsMutex.lock();
-  try {
-    const settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
+  await updateGlobalSettings((settings: GlobalSettings) => {
     if (ws?.readyState == WebSocket.OPEN) {
       settings.connectionStatus = "Connected to Moblin";
     } else {
       settings.connectionStatus = "Connecting to Moblin...";
     }
+  });
+}
+
+async function updateGlobalSettings(callback: (settings: GlobalSettings) => void) {
+  const unlock = await settingsMutex.lock();
+  try {
+    let settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
+    callback(settings);
     await streamDeck.settings.setGlobalSettings(settings);
   } finally {
     unlock();
