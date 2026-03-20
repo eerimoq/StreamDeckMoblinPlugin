@@ -1,26 +1,19 @@
 import streamDeck, { KeyDownEvent, SingletonAction } from "@elgato/streamdeck";
 import WebSocket from "ws";
-import { GlobalSettings } from "./plugin";
 import { JsonObject } from "@elgato/utils";
 
 const DEFAULT_HTTP_URL = "http://localhost";
 const RECONNECT_INTERVAL_MS = 5000;
 
-class Mutex {
-  private mutex = Promise.resolve();
-
-  lock(): Promise<() => void> {
-    return new Promise((resolve) => {
-      this.mutex = this.mutex.then(() => new Promise(resolve));
-    });
-  }
-}
-
-const settingsMutex = new Mutex();
 let ws: WebSocket | null = null;
 let requestId = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let currentWsUrl: string | null = null;
+let connectionStatus = "Connecting to Moblin...";
+
+type PropertyInspectorPayload = {
+  event?: string;
+};
 
 function toWebSocketUrl(url?: string): string | null {
   let httpUrl = url?.trim();
@@ -83,6 +76,29 @@ export function onStateChange(listener: StateListener): void {
   stateListeners.push(listener);
 }
 
+/*streamDeck.ui.onDidAppear(() => {
+  void sendConnectionStatus();
+});*/
+
+streamDeck.ui.onSendToPlugin<PropertyInspectorPayload>((ev) => {
+  if (ev.payload?.event !== "requestConnectionStatus") {
+    return;
+  }
+  sendConnectionStatus();
+});
+
+function setConnectionStatus(status: string): void {
+  connectionStatus = status;
+  sendConnectionStatus();
+}
+
+function sendConnectionStatus(): Promise<void> {
+  return streamDeck.ui.sendToPropertyInspector({
+    event: "connectionStatus",
+    value: connectionStatus,
+  });
+}
+
 async function handleMessage(data: WebSocket.Data): Promise<void> {
   try {
     const message = JSON.parse(data.toString());
@@ -109,52 +125,27 @@ async function connect(): Promise<void> {
   if (ws !== null || !currentWsUrl) {
     return;
   }
-  streamDeck.logger.info(`Connecting to Moblin at ${currentWsUrl}`);
-  await updateConnected();
+  setConnectionStatus("Connecting to Moblin...");
   const socket = new WebSocket(currentWsUrl);
   socket.on("open", async () => {
-    streamDeck.logger.info("Connected to Moblin");
+    setConnectionStatus("Connected to Moblin");
     getSettings();
-    await updateConnected();
   });
   socket.on("message", async (data) => {
     await handleMessage(data);
   });
   socket.on("close", async () => {
-    streamDeck.logger.info("Disconnected from Moblin");
     ws = null;
-    await updateConnected();
     scheduleReconnect();
   });
-  socket.on("error", (error) => {
-    streamDeck.logger.error(`Moblin WebSocket error: ${error.message}`);
+  socket.on("error", () => {
     socket.close();
   });
   ws = socket;
 }
 
-async function updateConnected() {
-  await updateGlobalSettings((settings: GlobalSettings) => {
-    if (ws?.readyState == WebSocket.OPEN) {
-      settings.connectionStatus = "Connected to Moblin";
-    } else {
-      settings.connectionStatus = "Connecting to Moblin...";
-    }
-  });
-}
-
-async function updateGlobalSettings(callback: (settings: GlobalSettings) => void) {
-  const unlock = await settingsMutex.lock();
-  try {
-    let settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
-    callback(settings);
-    await streamDeck.settings.setGlobalSettings(settings);
-  } finally {
-    unlock();
-  }
-}
-
 function scheduleReconnect(): void {
+  setConnectionStatus("Connecting to Moblin...");
   if (reconnectTimer !== null) {
     return;
   }

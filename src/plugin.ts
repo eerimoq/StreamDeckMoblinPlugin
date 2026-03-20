@@ -9,7 +9,6 @@ import { connectToMoblin } from "./moblin";
 
 export type GlobalSettings = {
   url?: string;
-  connectionStatus?: string;
 };
 
 streamDeck.logger.setLevel("info");
