@@ -1,3 +1,7 @@
 {
-  "ignorePatterns": ["package-lock.json", "com.eerimoq.moblin.sdPlugin/manifest.json"]
+  "ignorePatterns": [
+    "package-lock.json",
+    "com.eerimoq.moblin.sdPlugin/manifest.json",
+    "com.eerimoq.moblin.sdPlugin/ui/js/sdpi-components.js"
+  ]
 }

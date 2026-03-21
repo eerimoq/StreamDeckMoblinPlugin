@@ -2,9 +2,6 @@ const { streamDeckClient } = SDPIComponents;
 
 function init() {
   const connectionStatus = document.getElementById("connectionStatus");
-  if (!connectionStatus) {
-    return;
-  }
   streamDeckClient.sendToPropertyInspector.subscribe((ev) => {
     if (ev.payload?.event !== "connectionStatus") {
       return;
