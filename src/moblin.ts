@@ -16,12 +16,14 @@ export type StateListener = (state: MoblinState) => void;
 
 const DEFAULT_HTTP_URL = "http://localhost";
 const RECONNECT_INTERVAL_MS = 5000;
+const CONNECTION_STATUS_CONNECTING = "Connecting to Moblin...";
+const CONNECTION_STATUS_CONNECTED = "Connected to Moblin";
 
 let ws: WebSocket | null = null;
 let requestId = 0;
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let reconnectTimer: NodeJS.Timeout | null = null;
 let currentWsUrl: string | null = null;
-let connectionStatus = "Connecting to Moblin...";
+let connectionStatus = CONNECTION_STATUS_CONNECTING;
 const stateListeners: StateListener[] = [];
 
 function toWebSocketUrl(url?: string): string | null {
@@ -124,10 +126,10 @@ async function connect(): Promise<void> {
   if (ws !== null || !currentWsUrl) {
     return;
   }
-  setConnectionStatus("Connecting to Moblin...");
+  setConnectionStatus(CONNECTION_STATUS_CONNECTING);
   const socket = new WebSocket(currentWsUrl);
   socket.on("open", async () => {
-    setConnectionStatus("Connected to Moblin");
+    setConnectionStatus(CONNECTION_STATUS_CONNECTED);
     getSettings();
   });
   socket.on("message", async (data) => {
@@ -144,7 +146,7 @@ async function connect(): Promise<void> {
 }
 
 function scheduleReconnect(): void {
-  setConnectionStatus("Connecting to Moblin...");
+  setConnectionStatus(CONNECTION_STATUS_CONNECTING);
   if (reconnectTimer !== null) {
     return;
   }
