@@ -2,6 +2,18 @@ import streamDeck, { KeyDownEvent, SingletonAction } from "@elgato/streamdeck";
 import WebSocket from "ws";
 import { JsonObject } from "@elgato/utils";
 
+type PropertyInspectorPayload = {
+  event?: string;
+};
+
+export type MoblinState = {
+  recording?: boolean;
+  streaming?: boolean;
+  filters?: Array<any>;
+};
+
+export type StateListener = (state: MoblinState) => void;
+
 const DEFAULT_HTTP_URL = "http://localhost";
 const RECONNECT_INTERVAL_MS = 5000;
 
@@ -10,10 +22,7 @@ let requestId = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let currentWsUrl: string | null = null;
 let connectionStatus = "Connecting to Moblin...";
-
-type PropertyInspectorPayload = {
-  event?: string;
-};
+const stateListeners: StateListener[] = [];
 
 function toWebSocketUrl(url?: string): string | null {
   let httpUrl = url?.trim();
@@ -49,13 +58,6 @@ function toWebSocketUrl(url?: string): string | null {
   }
 }
 
-export type StateListener = (state: {
-  recording?: boolean;
-  streaming?: boolean;
-  filters?: Array<any>;
-}) => void;
-const stateListeners: StateListener[] = [];
-
 function toDataSourceItems(scenes: Array<any>): any[] {
   const items: any[] = [
     {
@@ -72,28 +74,13 @@ function toDataSourceItems(scenes: Array<any>): any[] {
   return items;
 }
 
-export function onStateChange(listener: StateListener): void {
-  stateListeners.push(listener);
-}
-
-/*streamDeck.ui.onDidAppear(() => {
-  void sendConnectionStatus();
-});*/
-
-streamDeck.ui.onSendToPlugin<PropertyInspectorPayload>((ev) => {
-  if (ev.payload?.event !== "requestConnectionStatus") {
-    return;
-  }
-  sendConnectionStatus();
-});
-
 function setConnectionStatus(status: string): void {
   connectionStatus = status;
   sendConnectionStatus();
 }
 
-function sendConnectionStatus(): Promise<void> {
-  return streamDeck.ui.sendToPropertyInspector({
+function sendConnectionStatus(): void {
+  streamDeck.ui.sendToPropertyInspector({
     event: "connectionStatus",
     value: connectionStatus,
   });
@@ -103,21 +90,33 @@ async function handleMessage(data: WebSocket.Data): Promise<void> {
   try {
     const message = JSON.parse(data.toString());
     const event = message?.event?.data;
-    if (event?.state?.data) {
-      const state = event.state.data;
-      for (const listener of stateListeners) {
-        listener(state);
-      }
+    if (event) {
+      handleMessageEvent(event);
     }
     const response = message?.response?.data;
-    if (response?.getSettings?.data?.scenes) {
-      await streamDeck.ui.sendToPropertyInspector({
-        event: "scenes",
-        items: toDataSourceItems(response.getSettings.data.scenes),
-      });
+    if (response) {
+      await handleMessageResponse(response);
     }
   } catch (error) {
-    streamDeck.logger.error(`Failed to parse Moblin message: ${error}`);
+    streamDeck.logger.error(`Failed to handle Moblin message: ${error}`);
+  }
+}
+
+function handleMessageEvent(event: any): void {
+  if (event.state?.data) {
+    const state: MoblinState = event.state.data;
+    for (const stateListener of stateListeners) {
+      stateListener(state);
+    }
+  }
+}
+
+async function handleMessageResponse(response: any): Promise<void> {
+  if (response.getSettings?.data?.scenes) {
+    await streamDeck.ui.sendToPropertyInspector({
+      event: "scenes",
+      items: toDataSourceItems(response.getSettings.data.scenes),
+    });
   }
 }
 
@@ -157,7 +156,6 @@ function scheduleReconnect(): void {
 
 function sendRequest(data: object): void {
   if (ws === null || ws.readyState !== WebSocket.OPEN) {
-    streamDeck.logger.warn("Cannot send request: not connected to Moblin");
     return;
   }
   const message = {
@@ -166,13 +164,22 @@ function sendRequest(data: object): void {
       data: data,
     },
   };
-  streamDeck.logger.info(`Sending request ${JSON.stringify(message)}`);
   ws.send(JSON.stringify(message));
 }
 
 function isConnected(): boolean {
   return ws?.readyState == WebSocket.OPEN;
 }
+
+streamDeck.ui.onSendToPlugin<PropertyInspectorPayload>((ev) => {
+  const payload = ev.payload;
+  if (!payload) {
+    return;
+  }
+  if (payload.event === "requestConnectionStatus") {
+    sendConnectionStatus();
+  }
+});
 
 export function connectToMoblin(url?: string): void {
   let newWsUrl = toWebSocketUrl(url);
@@ -187,6 +194,10 @@ export function connectToMoblin(url?: string): void {
   }
 }
 
+export function getSettings(): void {
+  sendRequest({ getSettings: {} });
+}
+
 export function setRecord(on: boolean): void {
   sendRequest({ setRecord: { on } });
 }
@@ -195,20 +206,16 @@ export function setStream(on: boolean): void {
   sendRequest({ setStream: { on } });
 }
 
+export function setScene(id: string): void {
+  sendRequest({ setScene: { id } });
+}
+
 export function setFilter(filter: string, on: boolean): void {
   sendRequest({ setFilter: { filter: { [filter]: {} }, on } });
 }
 
 export function triggerReaction(reaction: string): void {
   sendRequest({ triggerReaction: { reaction: { [reaction]: {} } } });
-}
-
-export function getSettings(): void {
-  sendRequest({ getSettings: {} });
-}
-
-export function setScene(id: string): void {
-  sendRequest({ setScene: { id } });
 }
 
 export abstract class MoblinAction<T extends JsonObject = JsonObject> extends SingletonAction<T> {
@@ -221,4 +228,8 @@ export abstract class MoblinAction<T extends JsonObject = JsonObject> extends Si
   }
 
   onMoblinKeyDown(_ev: KeyDownEvent<T>): Promise<void> | void {}
+}
+
+export function onStateChange(listener: StateListener): void {
+  stateListeners.push(listener);
 }
